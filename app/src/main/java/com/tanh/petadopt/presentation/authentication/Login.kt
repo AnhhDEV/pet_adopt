@@ -43,39 +43,44 @@ import kotlinx.coroutines.launch
 @Composable
 fun Login (
     modifier: Modifier = Modifier,
-    googleAuthUiClient: GoogleAuthUiClient,
     viewModel: LoginViewModel? = null,
-    navController: NavController
+    navController: (OneTimeEvent.Navigate) -> Unit
 ) {
 
     val state = viewModel?.state?.collectAsState(initial = LoginUiState())?.value ?: LoginUiState()
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        val currentUser = viewModel?.getCurrentUser()
+        if(currentUser != null) {
+            viewModel.onNavToHome()
+        }
+    }
+
+    LaunchedEffect(true) {
+        viewModel?.channel?.collect {event ->
+            when(event) {
+                is OneTimeEvent.Navigate -> {
+                    navController(event)
+                }
+                is OneTimeEvent.ShowSnackbar -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
+            }
+        }
+    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if(result.resultCode == Activity.RESULT_OK) {
-            scope.launch {
-                Log.d("login", "run1")
-                val signInResult = googleAuthUiClient.signInWithIntent(
-                    intent = result.data ?: return@launch
-                )
-                viewModel?.onSignInResult(signInResult)
-            }
+            viewModel?.onGetIntent(result = result)
         }
     }
 
     LaunchedEffect(state.isLoginSuccessful) {
-        Log.d("login", "run2")
-        if(state.isLoginSuccessful == true) {
-            Toast.makeText(context,"Sign in successful", Toast.LENGTH_LONG).show()
-            Log.d("login", "true")
-            navController.navigate("home")
-            viewModel?.resetState()  //reset để khi logout state sẽ là false để tránh trường hợp login lại
-        } else {
-            Log.d("login", "False")
-        }
+        viewModel?.loginSuccessfully()
     }
 
     Column(
@@ -111,15 +116,7 @@ fun Login (
 
         Button(
             onClick = {
-                scope.launch {
-                    val signInResult = googleAuthUiClient.signIn()
-                    Log.d("login", "run3")
-                    launcher.launch(
-                        IntentSenderRequest.Builder(
-                            signInResult ?: return@launch
-                        ).build()
-                    )
-                }
+                viewModel?.onLogin(launcher = launcher)
             },
             colors = ButtonDefaults.buttonColors(Yellow100),
             shape = RoundedCornerShape(8.dp),

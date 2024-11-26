@@ -19,9 +19,11 @@ import java.util.concurrent.CancellationException
 
 @Suppress("DEPRECATION")
 class GoogleAuthUiClient(
-    private val oneTapClient: SignInClient
+    private val context: Context
 ) {
+    private val oneTapClient: SignInClient = Identity.getSignInClient(context)
     private val auth = Firebase.auth
+
 
     //Lần đầu tiên đăng nhập. Giao tiếp qua intent. Lúc này gửi intent sender.
     suspend fun signIn(): IntentSender? {
