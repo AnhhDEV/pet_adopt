@@ -1,5 +1,6 @@
 package com.tanh.petadopt.presentation.authentication
 
+import android.app.Activity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -48,10 +49,12 @@ class LoginViewModel @Inject constructor(
 
     fun onGetIntent(result: ActivityResult) {
         viewModelScope.launch {
-            val signInResult = googleAuth.signInWithIntent(
-                intent = result.data ?: return@launch
-            )
-            onSignInResult(result = signInResult)
+           if(result.resultCode == Activity.RESULT_OK) {
+               val signInResult = googleAuth.signInWithIntent(
+                   intent = result.data ?: return@launch
+               )
+               onSignInResult(result = signInResult)
+           }
         }
     }
 

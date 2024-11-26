@@ -74,9 +74,7 @@ fun Login (
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
-        if(result.resultCode == Activity.RESULT_OK) {
-            viewModel?.onGetIntent(result = result)
-        }
+        viewModel?.onGetIntent(result = result)
     }
 
     LaunchedEffect(state.isLoginSuccessful) {
