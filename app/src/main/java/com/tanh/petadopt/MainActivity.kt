@@ -39,7 +39,14 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     composable(Util.HOME) {
-                        Home()
+                        Home(viewModel = loginViewModel) {
+                            navController.navigate(Util.LOG_IN) {
+                                launchSingleTop = true
+                                popUpTo(route = Util.LOG_IN) {
+                                    inclusive = true
+                                }
+                            }
+                        }
                     }
                 }
             }

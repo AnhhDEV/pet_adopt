@@ -6,3 +6,8 @@ object Util {
     const val HOME = "home"
     const val LOG_IN = "login"
 }
+
+enum class Category {
+    DOG, CAT, FISH, BIRD
+}
+

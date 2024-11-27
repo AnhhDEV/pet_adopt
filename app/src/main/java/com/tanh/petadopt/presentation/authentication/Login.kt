@@ -50,6 +50,7 @@ fun Login (
     val state = viewModel?.state?.collectAsState(initial = LoginUiState())?.value ?: LoginUiState()
     val context = LocalContext.current
 
+    //Check already login
     LaunchedEffect(Unit) {
         val currentUser = viewModel?.getCurrentUser()
         if(currentUser != null) {
@@ -57,6 +58,7 @@ fun Login (
         }
     }
 
+    //Lắng nghe onetimeevent
     LaunchedEffect(true) {
         viewModel?.channel?.collect {event ->
             when(event) {

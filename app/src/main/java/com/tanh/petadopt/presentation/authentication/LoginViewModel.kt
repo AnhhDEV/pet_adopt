@@ -1,17 +1,23 @@
 package com.tanh.petadopt.presentation.authentication
 
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.auth.User
 import com.tanh.petadopt.data.GoogleAuthUiClient
+import com.tanh.petadopt.data.UserRepository
 import com.tanh.petadopt.domain.model.SignInResult
 import com.tanh.petadopt.domain.model.UserData
+import com.tanh.petadopt.domain.model.onError
+import com.tanh.petadopt.domain.model.onSuccess
 import com.tanh.petadopt.presentation.OneTimeEvent
 import com.tanh.petadopt.util.Util
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +28,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val googleAuth: GoogleAuthUiClient
+    private val googleAuth: GoogleAuthUiClient,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginUiState())
@@ -31,16 +38,40 @@ class LoginViewModel @Inject constructor(
     private val _channel = Channel<OneTimeEvent>()
     val channel = _channel.receiveAsFlow()
 
-    fun onNavToHome() {
-        sendEvent(OneTimeEvent.Navigate(route = Util.HOME))
+    private fun createUser(name: String?, id: String, photoUrl: String?) {
+        viewModelScope.launch {
+            userRepository.insertUser(name, id, photoUrl)
+                .onError {
+                    sendEvent(OneTimeEvent.ShowToast("unknown error"))
+                }
+                .onSuccess {
+                }
+        }
     }
 
-    fun getCurrentUser(): UserData? {
-        return googleAuth.getSignedInUser()
+    private suspend fun getUser(userId: String): UserData? {
+        var userData: UserData? = null
+        userRepository.getUser(userId = userId)
+            .onSuccess {
+                userData = it
+            }
+            .onError {
+                userData = null
+            }
+        return userData
     }
 
     fun loginSuccessfully() {
-        if(_state.value.isLoginSuccessful == true) {
+        if (_state.value.isLoginSuccessful == true) {
+            val user = googleAuth.getSignedInUser()
+            if (user != null) {
+                viewModelScope.launch {
+                    val check = getUser(user.userId)
+                    if (check == null) {
+                        createUser(user.username, user.userId, user.profilePictureUrl)
+                    }
+                }
+            }
             sendEvent(OneTimeEvent.ShowSnackbar(message = "Login successfully"))
             sendEvent(OneTimeEvent.Navigate(route = Util.HOME))
             resetState()
@@ -49,12 +80,12 @@ class LoginViewModel @Inject constructor(
 
     fun onGetIntent(result: ActivityResult) {
         viewModelScope.launch {
-           if(result.resultCode == Activity.RESULT_OK) {
-               val signInResult = googleAuth.signInWithIntent(
-                   intent = result.data ?: return@launch
-               )
-               onSignInResult(result = signInResult)
-           }
+            if (result.resultCode == Activity.RESULT_OK) {
+                val signInResult = googleAuth.signInWithIntent(
+                    intent = result.data ?: return@launch
+                )
+                onSignInResult(result = signInResult)
+            }
         }
     }
 
@@ -67,6 +98,20 @@ class LoginViewModel @Inject constructor(
                 ).build()
             )
         }
+    }
+
+    fun onLogout() {
+        viewModelScope.launch {
+            googleAuth.signOut()
+        }
+    }
+
+    fun onNavToHome() {
+        sendEvent(OneTimeEvent.Navigate(route = Util.HOME))
+    }
+
+    fun getCurrentUser(): UserData? {
+        return googleAuth.getSignedInUser()
     }
 
     private fun onSignInResult(result: SignInResult) {
