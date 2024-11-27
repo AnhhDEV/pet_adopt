@@ -1,6 +1,6 @@
 package com.tanh.petadopt.domain.model
 
-data class Animal(
+data class Pet(
     val animalId: String? = "",
     val ownerId: String? = "",
     val name: String? = "",

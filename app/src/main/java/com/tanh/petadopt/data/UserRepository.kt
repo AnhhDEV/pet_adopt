@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObjects
 import com.tanh.petadopt.domain.model.Result
 import com.tanh.petadopt.domain.model.UserData
+import com.tanh.petadopt.util.Util
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
@@ -16,7 +17,7 @@ class UserRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
 
-    private val collection = firestore.collection("users")
+    private val collection = firestore.collection(Util.USERS_COLLECTION)
 
     suspend fun getUser(userId: String): Result<UserData, Exception> {
         return try {
