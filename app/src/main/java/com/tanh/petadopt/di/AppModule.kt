@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.tanh.petadopt.data.GoogleAuthUiClient
 import com.tanh.petadopt.data.PetRepository
+import com.tanh.petadopt.data.PreferenceRepository
 import com.tanh.petadopt.data.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -38,5 +39,9 @@ object AppModule {
     @Provides
     @Singleton
     fun providePetRepository(firestore: FirebaseFirestore) = PetRepository(firestore)
+
+    @Provides
+    @Singleton
+    fun providePreferenceRepository(firestore: FirebaseFirestore, auth: GoogleAuthUiClient) = PreferenceRepository(firestore, auth)
 
 }

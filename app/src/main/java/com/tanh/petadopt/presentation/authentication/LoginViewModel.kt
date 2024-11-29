@@ -84,6 +84,9 @@ class LoginViewModel @Inject constructor(
                 val signInResult = googleAuth.signInWithIntent(
                     intent = result.data ?: return@launch
                 )
+                if(signInResult.errorMessage != null) {
+                    sendEvent(OneTimeEvent.ShowSnackbar(message = signInResult.errorMessage))
+                }
                 onSignInResult(result = signInResult)
             }
         }

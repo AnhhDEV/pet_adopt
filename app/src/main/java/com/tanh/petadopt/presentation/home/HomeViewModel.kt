@@ -9,6 +9,7 @@ import com.tanh.petadopt.domain.model.UserData
 import com.tanh.petadopt.domain.model.onError
 import com.tanh.petadopt.domain.model.onSuccess
 import com.tanh.petadopt.presentation.OneTimeEvent
+import com.tanh.petadopt.util.Util
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,19 +31,19 @@ class HomeViewModel @Inject constructor(
     private val _channel = Channel<OneTimeEvent>()
     val channel = _channel.receiveAsFlow()
 
+    fun onNavToDetail(petId: String) {
+        if(petId.isNotEmpty()) {
+            sendEvent(OneTimeEvent.Navigate(Util.DETAIL + "/petId=$petId"))
+        } else {
+            sendEvent(OneTimeEvent.ShowToast("Pet id is empty"))
+        }
+    }
+
     fun getUser() {
         val user = googleAuth.getSignedInUser()
         _state.update {
             it.copy(
                 userData = user
-            )
-        }
-    }
-
-    fun onFiltered() {
-        _state.update {
-            it.copy(
-                isFiltered = !it.isFiltered
             )
         }
     }

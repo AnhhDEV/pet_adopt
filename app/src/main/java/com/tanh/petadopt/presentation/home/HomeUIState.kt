@@ -7,6 +7,5 @@ data class HomeUIState(
     val pets: List<Pet> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val userData: UserData? = null,
-    val isFiltered: Boolean = false
+    val userData: UserData? = null
 )

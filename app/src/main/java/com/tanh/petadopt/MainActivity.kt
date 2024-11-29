@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -12,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -24,6 +26,8 @@ import com.tanh.petadopt.presentation.EntireScreen
 import com.tanh.petadopt.presentation.authentication.Login
 import com.tanh.petadopt.presentation.authentication.LoginViewModel
 import com.tanh.petadopt.presentation.home.Home
+import com.tanh.petadopt.presentation.home.HomeViewModel
+import com.tanh.petadopt.ui.theme.Gray
 import com.tanh.petadopt.ui.theme.PetAdoptTheme
 import com.tanh.petadopt.util.Util
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,9 +45,9 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val loginViewModel = hiltViewModel<LoginViewModel>()
+                val homeViewModel = hiltViewModel<HomeViewModel>()
                 val navController = rememberNavController()
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         if(isLoggedIn) {
                             EntireScreen(navController = navController)
@@ -64,7 +68,8 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         composable(Util.HOME) {
-                            Home(viewModel = loginViewModel) {
+                            Home(viewModel = homeViewModel) {
+                                isLoggedIn = !isLoggedIn
                                 navController.navigate(Util.LOG_IN) {
                                     launchSingleTop = true
                                     popUpTo(route = Util.LOG_IN) {
