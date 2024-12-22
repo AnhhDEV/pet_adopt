@@ -45,7 +45,7 @@ class PetRepository @Inject constructor(
         }.flowOn(Dispatchers.IO)
     }
 
-    suspend fun getAllPetsByCategory(category: String): Flow<Result<List<Pet>, Exception>> {
+    fun getAllPetsByCategory(category: String): Flow<Result<List<Pet>, Exception>> {
         return callbackFlow<Result<List<Pet>, Exception>> {
             var snapshotStateListener: ListenerRegistration? = null
             try {

@@ -42,6 +42,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providePreferenceRepository(firestore: FirebaseFirestore, auth: GoogleAuthUiClient) = PreferenceRepository(firestore, auth)
+    fun providePreferenceRepository(firestore: FirebaseFirestore) = PreferenceRepository(firestore)
 
 }

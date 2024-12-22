@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tanh.petadopt.data.GoogleAuthUiClient
 import com.tanh.petadopt.data.PetRepository
+import com.tanh.petadopt.data.PreferenceRepository
 import com.tanh.petadopt.data.UserRepository
 import com.tanh.petadopt.domain.model.UserData
 import com.tanh.petadopt.domain.model.onError
@@ -22,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val googleAuth: GoogleAuthUiClient,
-    private val repository: PetRepository
+    private val repository: PetRepository,
+    private val preferenceRepository: PreferenceRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUIState())
@@ -32,7 +34,7 @@ class HomeViewModel @Inject constructor(
     val channel = _channel.receiveAsFlow()
 
     fun onNavToDetail(petId: String) {
-        if(petId.isNotEmpty()) {
+        if (petId.isNotEmpty()) {
             sendEvent(OneTimeEvent.Navigate(Util.DETAIL + "/petId=$petId"))
         } else {
             sendEvent(OneTimeEvent.ShowToast("Pet id is empty"))
@@ -54,9 +56,12 @@ class HomeViewModel @Inject constructor(
                 isLoading = true
             )
         }
-        repository.getAllPetsByCategory(category = category).collect { result ->
+        preferenceRepository.getPetPreferencesByCategory(
+            userId = googleAuth.getSignedInUser()?.userId ?: "",
+            category = category
+        ).collect { result ->
             result.run {
-                onSuccess {list ->
+                onSuccess { list ->
                     _state.update {
                         it.copy(
                             pets = list,
@@ -82,9 +87,11 @@ class HomeViewModel @Inject constructor(
                 isLoading = true
             )
         }
-        repository.getAllPets().collect { result ->
+        preferenceRepository.getPreferenceByUser(
+            userId = googleAuth.getSignedInUser()?.userId ?: ""
+        ).collect { result ->
             result.run {
-                onSuccess {list ->
+                onSuccess { list ->
                     _state.update {
                         it.copy(
                             pets = list,
@@ -104,6 +111,23 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun addFavorite(petId: String) {
+        viewModelScope.launch {
+            preferenceRepository.addToFavorite(
+                userId = googleAuth.getSignedInUser()?.userId ?: "",
+                petId = petId
+            )
+        }
+    }
+
+    fun removeFavorite(petId: String) {
+        viewModelScope.launch {
+            preferenceRepository.removeFromFavorite(
+                userId = googleAuth.getSignedInUser()?.userId ?: "",
+                petId = petId
+            )
+        }
+    }
 
     private fun sendEvent(event: OneTimeEvent) {
         viewModelScope.launch {

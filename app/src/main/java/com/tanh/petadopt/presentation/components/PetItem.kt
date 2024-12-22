@@ -1,5 +1,6 @@
 package com.tanh.petadopt.presentation.components
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,11 +16,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
+import com.tanh.petadopt.domain.dto.PetDto
 import com.tanh.petadopt.domain.model.Pet
 import com.tanh.petadopt.ui.theme.Yellow00
 import com.tanh.petadopt.ui.theme.Yellow60
@@ -42,26 +48,19 @@ import com.tanh.petadopt.ui.theme.Yellow60
 @Composable
 fun PetItem(
     modifier: Modifier = Modifier,
-    pet: Pet,
-    onAddFavorite: (Boolean) -> Unit,
-    onDetail: () -> Unit
+    pet: PetDto,
+    onAddFavorite: (Pair<String, Boolean>) -> Unit,
+    onDetail: (String) -> Unit
 ) {
-
-    val isFavorite by remember {
-        mutableStateOf(false)
+    // Theo dõi thay đổi `pet` và cập nhật trạng thái `isFavorite`
+    var isFavorite by remember(pet.animalId) {
+        mutableStateOf(pet.isFavorite ?: false)
     }
 
-    val icon = if(!isFavorite) {
-        Icons.Outlined.FavoriteBorder
-    } else {
-        Icons.Filled.Favorite
-    }
+    Log.d("test", "${pet.name}: $isFavorite")
 
-    val color = if(!isFavorite) {
-        Color.White
-    } else {
-        Color.Red
-    }
+    val icon = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder
+    val color = if (isFavorite) Color.Red else Color.White
 
     Box(
         modifier = modifier
@@ -70,7 +69,7 @@ fun PetItem(
             .width(180.dp)
             .height(200.dp)
             .clickable {
-                onDetail()
+                onDetail(pet.animalId ?: "")
             }
     ) {
         Box(
@@ -94,7 +93,8 @@ fun PetItem(
                     .size(40.dp)
                     .align(Alignment.TopEnd)
                     .clickable {
-                        onAddFavorite(!isFavorite)
+                        isFavorite = !isFavorite
+                        onAddFavorite(Pair(pet.animalId ?: "", isFavorite))
                     }
             )
         }
@@ -130,19 +130,4 @@ fun PetItem(
             }
         }
     }
-
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun PreviewPetItem() {
-    PetItem(
-        pet = Pet(
-            name = "blackdow",
-            age = 2,
-            breed = "German",
-            photoUrl = "https://i.ibb.co/Ph7q3WT/th.jpg"
-        ),
-        onAddFavorite = {}
-    ) { }
 }

@@ -1,8 +1,9 @@
 package com.tanh.petadopt.data
 
+import com.google.apphosting.datastore.testing.DatastoreTestTrace.FirestoreV1Action.Listen
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import com.tanh.petadopt.domain.model.Preference
+import com.tanh.petadopt.domain.dto.PetDto
 import com.tanh.petadopt.domain.model.Result
 import com.tanh.petadopt.util.Util
 import kotlinx.coroutines.Dispatchers
@@ -10,84 +11,141 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
+@Suppress("LABEL_NAME_CLASH")
 class PreferenceRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val auth: GoogleAuthUiClient
 ) {
 
-    private val userData = auth.getSignedInUser()
     private val collection = firestore.collection(Util.PREFERENCES_COLLECTION)
 
-    suspend fun getPreferences(): Flow<Result<Preference, Exception>> {
+    fun getPreferenceByUser(userId: String): Flow<com.tanh.petadopt.domain.model.Result<List<PetDto>, Exception>> {
         return callbackFlow {
             var snapshotStateListener: ListenerRegistration? = null
+            var petListener: ListenerRegistration? = null
             try {
-                 snapshotStateListener = collection.whereEqualTo("userId", userData)
-                    .addSnapshotListener {snapshot, error ->
-                        val response = if(snapshot != null) {
-                            val preference = snapshot.documents.first().toObject(Preference::class.java) ?: Preference()
-                            Result.Success(preference)
-                        } else {
-                            Result.Error(error ?: Exception("Unknown error"))
+                snapshotStateListener = collection.whereEqualTo("userId", userId)
+                    .addSnapshotListener { favoriteSnapshot, errorSnapshot ->
+                        if(errorSnapshot != null) {
+                            trySend(Result.Error(errorSnapshot)).isSuccess
+                            return@addSnapshotListener
                         }
-                        trySend(response)
+
+                        if(favoriteSnapshot != null) {
+                            val favoritePetIds = favoriteSnapshot.documents.mapNotNull { it["petId"].toString() }
+                            petListener = firestore.collection(Util.ANIMALS_COLLECTION)
+                                .addSnapshotListener { petSnapshot, petError ->
+                                    if(petError != null) {
+                                        trySend(Result.Error(petError)).isSuccess
+                                        return@addSnapshotListener
+                                    }
+
+                                    if(petSnapshot != null) {
+                                        val pets = petSnapshot.documents.map {doc ->
+                                            PetDto(
+                                                animalId = doc.getString("animalId") ?: "",
+                                                ownerId = doc.getString("ownerId") ?: "",
+                                                name = doc.getString("name") ?: "",
+                                                age = doc.getLong("age") ?: 0L,
+                                                weight = doc.getLong("weight") ?: 0L,
+                                                breed = doc.getString("breed") ?: "",
+                                                category = doc.getString("category") ?: "",
+                                                gender = doc.getBoolean("gender") ?: false,
+                                                photoUrl = doc.getString("photoUrl") ?: "",
+                                                isFavorite = favoritePetIds.contains(doc.id)
+                                            )
+                                        }
+                                        trySend(Result.Success(pets)).isSuccess
+                                    }
+                                }
+                        }
                     }
             } catch (e: Exception) {
-                Result.Error(e)
+                trySend(Result.Error(e))
             }
             awaitClose {
                 snapshotStateListener?.remove()
+                petListener?.remove()
             }
         }.flowOn(Dispatchers.IO)
     }
 
-    suspend fun updatePreference(preference: Preference, preferenceId: String): Result<Boolean, Exception> {
-        return try {
-            withContext(Dispatchers.IO) {
-                val pair = hashMapOf(
-                    "pets" to preference.pets,
-                    "userId" to preference.userId
-                )
-                suspendCoroutine { continuation ->
-                    collection.document(preferenceId).update(pair)
-                        .addOnSuccessListener {
-                            continuation.resume(Result.Success(true))
+    fun getPetPreferencesByCategory(userId: String, category: String): Flow<com.tanh.petadopt.domain.model.Result<List<PetDto>, Exception>> {
+        return callbackFlow {
+            var snapshotStateListener: ListenerRegistration? = null
+            var petListener: ListenerRegistration? = null
+            try {
+                snapshotStateListener = collection.whereEqualTo("userId", userId)
+                    .addSnapshotListener { favoriteSnapshot, errorSnapshot ->
+                        if(errorSnapshot != null) {
+                            trySend(Result.Error(errorSnapshot)).isSuccess
+                            return@addSnapshotListener
                         }
-                        .addOnFailureListener { exception ->
-                            continuation.resume(Result.Error(exception))
+
+                        if(favoriteSnapshot != null) {
+                            val favoritePetIds = favoriteSnapshot.documents.mapNotNull { it["petId"].toString() }
+
+                            petListener = firestore.collection(Util.ANIMALS_COLLECTION)
+                                .whereEqualTo("category", category)
+                                .addSnapshotListener { petSnapshot, petError ->
+                                    if(petError != null) {
+                                        trySend(Result.Error(petError)).isSuccess
+                                        return@addSnapshotListener
+                                    }
+
+                                    if(petSnapshot != null) {
+                                        val pets = petSnapshot.documents.map {doc ->
+                                            PetDto(
+                                                animalId = doc.getString("animalId") ?: "",
+                                                ownerId = doc.getString("ownerId") ?: "",
+                                                name = doc.getString("name") ?: "",
+                                                age = doc.getLong("age") ?: 0L,
+                                                weight = doc.getLong("weight") ?: 0L,
+                                                breed = doc.getString("breed") ?: "",
+                                                category = doc.getString("category") ?: "",
+                                                gender = doc.getBoolean("gender") ?: false,
+                                                photoUrl = doc.getString("photoUrl") ?: "",
+                                                isFavorite = favoritePetIds.contains(doc.id)
+                                            )
+                                        }
+                                        trySend(Result.Success(pets)).isSuccess
+                                    }
+                                }
                         }
-                }
+                    }
+            } catch (e: Exception) {
+                trySend(Result.Error(e))
             }
-        } catch (e: Exception) {
-            Result.Error(e)
+            awaitClose {
+                snapshotStateListener?.remove()
+                petListener?.remove()
+            }
+        }.flowOn(Dispatchers.IO)
+    }
+
+    suspend fun addToFavorite(userId: String, petId: String) {
+        withContext(Dispatchers.IO) {
+            val newFavorite = hashMapOf(
+                "userId" to userId,
+                "petId" to petId
+            )
+            collection.add(newFavorite)
         }
     }
 
-    suspend fun insertPreference(preference: Preference): Result<Boolean, Exception> {
-        return try {
-            withContext(Dispatchers.IO) {
-                val pair= hashMapOf<String, Any>(
-                    "pets" to preference.pets,
-                    "userId" to preference.userId
-                )
-                suspendCoroutine { continuation ->
-                    val documentId = collection.document().id
-                    collection.document(documentId).set(pair)
-                        .addOnSuccessListener {
-                            continuation.resume(Result.Success(true))
-                        }
-                        .addOnFailureListener { exception ->
-                            continuation.resume(Result.Error(exception))
-                        }
+    suspend fun removeFromFavorite(userId: String, petId: String) {
+        withContext(Dispatchers.IO) {
+            collection.whereEqualTo("userId", userId)
+                .whereEqualTo("petId", petId)
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    for( doc in snapshot.documents) {
+                        doc.reference.delete()
+                    }
                 }
-            }
-        } catch (e: Exception) {
-            Result.Error(e)
         }
     }
 

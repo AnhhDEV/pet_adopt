@@ -51,7 +51,7 @@ import com.tanh.petadopt.util.Util
 import kotlinx.coroutines.launch
 
 @Composable
-fun Home (
+fun Home(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel? = null,
     onNav: (OneTimeEvent.Navigate) -> Unit
@@ -73,13 +73,13 @@ fun Home (
     }
 
     LaunchedEffect(category) {
-        if(category.isNotEmpty()) {
+        if (category.isNotEmpty()) {
             viewModel?.getAllPetsByCategory(category)
         }
     }
 
     LaunchedEffect(isClicked) {
-        if(!isClicked) {
+        if (!isClicked) {
             viewModel?.getAllPets()
         }
     }
@@ -91,10 +91,11 @@ fun Home (
 
     LaunchedEffect(true) {
         channel?.collect { event ->
-            when(event) {
+            when (event) {
                 is OneTimeEvent.Navigate -> {
                     onNav(event)
                 }
+
                 is OneTimeEvent.ShowSnackbar -> TODO()
                 is OneTimeEvent.ShowToast -> {
                     Toast.makeText(
@@ -108,7 +109,8 @@ fun Home (
     }
 
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
             .padding(16.dp)
     ) {
         Row(
@@ -130,7 +132,8 @@ fun Home (
             AsyncImage(
                 model = state.userData?.profilePictureUrl,
                 contentDescription = null,
-                modifier = Modifier.height(50.dp)
+                modifier = Modifier
+                    .height(50.dp)
                     .padding(start = 130.dp)
                     .clip(CircleShape)
             )
@@ -161,17 +164,19 @@ fun Home (
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
+
+        //categories
         Text(
             text = "Category",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
-        LazyRow (
+        LazyRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            items(Util.categories) {(pair, click) ->
+            items(Util.categories) { (pair, click) ->
                 CategoryItem(
                     category = pair,
                     onChangeClicked = {
@@ -183,6 +188,8 @@ fun Home (
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
+
+        //pets
         LazyRow {
             items(state.pets) { pet ->
                 PetItem(
@@ -191,14 +198,24 @@ fun Home (
                     },
                     pet = pet,
                     onAddFavorite = {
+                        if(it.second) {
+                            viewModel?.addFavorite(it.first)
+                        } else {
+                            viewModel?.removeFavorite(it.first)
+                        }
+                    },
+                    onDetail = {
 
                     }
-                ) { }
+                )
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
+
+        //button new pet
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .height(80.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .border(
@@ -218,7 +235,8 @@ fun Home (
                 Icon(
                     painter = painterResource(id = R.drawable.pets),
                     contentDescription = null,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(40.dp)
                         .aspectRatio(1f),
                     tint = Yellow60
                 )

@@ -1,13 +1,10 @@
 package com.tanh.petadopt.data
 
-import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.toObjects
 import com.tanh.petadopt.domain.model.Result
 import com.tanh.petadopt.domain.model.UserData
 import com.tanh.petadopt.util.Util
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.resume

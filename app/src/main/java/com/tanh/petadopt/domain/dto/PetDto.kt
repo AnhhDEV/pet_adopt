@@ -1,6 +1,6 @@
-package com.tanh.petadopt.domain.model
+package com.tanh.petadopt.domain.dto
 
-data class OwnedPet(
+data class PetDto(
     val animalId: String? = "",
     val ownerId: String? = "",
     val name: String? = "",
@@ -12,5 +12,5 @@ data class OwnedPet(
     val photoUrl: String? = "",
     val address: String? = "",
     val about: String? = "",
-    val isFavorite: Boolean? = false
+    var isFavorite: Boolean? = false
 )

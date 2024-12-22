@@ -6,12 +6,15 @@ object Util {
 
     const val DEFAULT_WEB_CLIENT_ID = "856323978983-aa7m25o3rhbq38rfhdcoj6dl4fo6igeo.apps.googleusercontent.com"
     const val HOME = "Home"
+    const val FAVORITE = "Favorite"
+    const val INBOX = "Inbox"
+    const val PROFILE = "Profile"
     const val LOG_IN = "login"
     const val DETAIL = "detail"
 
     const val ANIMALS_COLLECTION = "pets"
     const val USERS_COLLECTION = "users"
-    const val PREFERENCES_COLLECTION = "preferences"
+    const val PREFERENCES_COLLECTION = "favorite_pets"
 
     val categories = listOf(
         "Dogs" to R.drawable.dog to false,
