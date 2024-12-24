@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.auth.User
@@ -31,6 +34,9 @@ class LoginViewModel @Inject constructor(
     private val googleAuth: GoogleAuthUiClient,
     private val userRepository: UserRepository
 ) : ViewModel() {
+
+    var isLoggedIn by mutableStateOf(false)
+        private set
 
     private val _state = MutableStateFlow(LoginUiState())
     val state = _state.asStateFlow()
@@ -131,6 +137,14 @@ class LoginViewModel @Inject constructor(
         _state.update {
             LoginUiState()
         }
+    }
+
+    fun logIn() {
+        isLoggedIn = true
+    }
+
+    fun logOut() {
+        isLoggedIn = false
     }
 
     private fun sendEvent(event: OneTimeEvent) {

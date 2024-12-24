@@ -17,16 +17,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.google.android.gms.auth.api.identity.Identity
 import com.tanh.petadopt.data.GoogleAuthUiClient
 import com.tanh.petadopt.presentation.EntireScreen
 import com.tanh.petadopt.presentation.authentication.Login
 import com.tanh.petadopt.presentation.authentication.LoginViewModel
+import com.tanh.petadopt.presentation.favorites.FavoriteScreen
 import com.tanh.petadopt.presentation.home.Home
 import com.tanh.petadopt.presentation.home.HomeViewModel
+import com.tanh.petadopt.presentation.pet_detail.DetailScreen
+import com.tanh.petadopt.presentation.pet_detail.DetailViewModel
 import com.tanh.petadopt.ui.theme.Gray
 import com.tanh.petadopt.ui.theme.PetAdoptTheme
 import com.tanh.petadopt.util.Util
@@ -46,14 +51,15 @@ class MainActivity : ComponentActivity() {
 
                 val loginViewModel = hiltViewModel<LoginViewModel>()
                 val homeViewModel = hiltViewModel<HomeViewModel>()
+                val detailViewModel = hiltViewModel<DetailViewModel>()
                 val navController = rememberNavController()
                 Scaffold(
                     bottomBar = {
-                        if(isLoggedIn) {
+                        if (isLoggedIn) {
                             EntireScreen(navController = navController)
                         }
                     }
-                ) {paddings ->
+                ) { paddings ->
                     NavHost(
                         modifier = Modifier.padding(paddings),
                         navController = navController,
@@ -70,12 +76,33 @@ class MainActivity : ComponentActivity() {
                         composable(Util.HOME) {
                             Home(viewModel = homeViewModel) {
                                 isLoggedIn = !isLoggedIn
-                                navController.navigate(Util.LOG_IN) {
-                                    launchSingleTop = true
-                                    popUpTo(route = Util.LOG_IN) {
-                                        inclusive = true
-                                    }
+                                navController.navigate(it.route)
+                            }
+                        }
+
+                        composable(
+                            route = Util.FAVORITE
+                        ) {
+                            FavoriteScreen(viewModel = homeViewModel)
+                        }
+
+                        composable(
+                            route = Util.DETAIL + "/{petId}",
+                            arguments = listOf(
+                                navArgument(
+                                    name = "petId"
+                                ) {
+                                    type = NavType.StringType
+                                    defaultValue = ""
                                 }
+                            )
+                        ) {
+                            val petId = it.arguments?.getString("petId") ?: ""
+                            DetailScreen(
+                                viewModel = detailViewModel,
+                                petId = petId
+                            ) { event ->
+                                navController.navigate(event.route)
                             }
                         }
                     }

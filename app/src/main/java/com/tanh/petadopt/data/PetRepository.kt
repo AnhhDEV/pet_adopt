@@ -2,6 +2,7 @@ package com.tanh.petadopt.data
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.tanh.petadopt.domain.dto.PetDto
 import com.tanh.petadopt.domain.model.Pet
 import com.tanh.petadopt.domain.model.Result
 import com.tanh.petadopt.util.Util
@@ -10,6 +11,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -70,21 +72,41 @@ class PetRepository @Inject constructor(
         }.flowOn(Dispatchers.IO)
     }
 
-    suspend fun getPetById(id: String): Result<Pet, Exception> {
+    suspend fun getPetById(petId: String, userId: String): Result<PetDto, Exception> {
         return try {
             withContext(Dispatchers.IO) {
-                suspendCoroutine { continuation ->
-                    collection.document(id)
-                        .get()
-                        .addOnSuccessListener { snapshot ->
-                            val pet = snapshot.toObject(Pet::class.java)
-                            if (pet != null) {
-                                continuation.resume(Result.Success(pet))
-                            } else {
-                                continuation.resume(Result.Error(Exception("Pet not found")))
-                            }
-                        }
+                val petSnapshot = firestore.collection(Util.ANIMALS_COLLECTION)
+                    .document(petId)
+                    .get()
+                    .await()
+
+                val pet = petSnapshot.toObject(Pet::class.java)
+                    ?: return@withContext Result.Error(Exception("Pet not found"))
+
+                var petDto = PetDto(
+                    animalId = pet.animalId,
+                    ownerId = pet.ownerId,
+                    name = pet.name,
+                    age = pet.age,
+                    weight = pet.weight,
+                    breed = pet.breed,
+                    category = pet.category,
+                    gender = pet.gender,
+                    photoUrl = pet.photoUrl,
+                    isFavorite = false
+                )
+
+                val preferencesSnapshot = firestore.collection(Util.PREFERENCES_COLLECTION)
+                    .whereEqualTo("userId", userId)
+                    .whereEqualTo("animalId", petId)
+                    .get()
+                    .await()
+
+                if (!preferencesSnapshot.isEmpty) {
+                    petDto = petDto.copy(isFavorite = true)
                 }
+
+                Result.Success(petDto)
             }
         } catch (e: Exception) {
             Result.Error(e)

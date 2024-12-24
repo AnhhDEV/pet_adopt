@@ -1,5 +1,6 @@
 package com.tanh.petadopt.presentation.home
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -204,13 +205,13 @@ fun Home(
                             viewModel?.removeFavorite(it.first)
                         }
                     },
-                    onDetail = {
-
+                    onDetail = {petId ->
+                        viewModel?.onNavToDetail(petId = petId)
                     }
                 )
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         //button new pet
         Column(

@@ -35,7 +35,7 @@ class HomeViewModel @Inject constructor(
 
     fun onNavToDetail(petId: String) {
         if (petId.isNotEmpty()) {
-            sendEvent(OneTimeEvent.Navigate(Util.DETAIL + "/petId=$petId"))
+            sendEvent(OneTimeEvent.Navigate(Util.DETAIL + "/$petId"))
         } else {
             sendEvent(OneTimeEvent.ShowToast("Pet id is empty"))
         }
