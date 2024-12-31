@@ -1,5 +1,6 @@
 package com.tanh.petadopt.data
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.tanh.petadopt.domain.dto.PetDto
@@ -93,16 +94,18 @@ class PetRepository @Inject constructor(
                     category = pet.category,
                     gender = pet.gender,
                     photoUrl = pet.photoUrl,
+                    address = pet.address,
+                    about = pet.about,
                     isFavorite = false
                 )
 
                 val preferencesSnapshot = firestore.collection(Util.PREFERENCES_COLLECTION)
                     .whereEqualTo("userId", userId)
-                    .whereEqualTo("animalId", petId)
+                    .whereEqualTo("petId", petId)
                     .get()
                     .await()
 
-                if (!preferencesSnapshot.isEmpty) {
+                if (preferencesSnapshot.documents.isNotEmpty()) {
                     petDto = petDto.copy(isFavorite = true)
                 }
 

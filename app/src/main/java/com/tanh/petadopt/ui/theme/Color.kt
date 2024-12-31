@@ -11,4 +11,4 @@ val Yellow20 = Color(0xFFe7c982)
 
 val Gray = Color(0xFFefefef)
 
-val Blue = Color(0xFF0ea0fe)
+val MyBlue = Color(0xFF0ea0fe)

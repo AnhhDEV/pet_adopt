@@ -21,11 +21,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tanh.petadopt.R
-import com.tanh.petadopt.ui.theme.Blue
+import com.tanh.petadopt.ui.theme.MyBlue
 import com.tanh.petadopt.ui.theme.Yellow00
 import com.tanh.petadopt.ui.theme.Yellow40
 
@@ -44,12 +42,12 @@ fun CategoryItem (
     val backgroundColor = if(!isClicked) {
         Yellow00
     } else {
-        Blue
+        MyBlue
     }
     val strokeColor = if(!isClicked) {
         Yellow40
     } else {
-        Blue
+        MyBlue
     }
     Column(
         modifier = modifier.

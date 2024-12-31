@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,13 +65,16 @@ fun Home(
     val context = LocalContext.current
     val isError = state.errorMessage != null
 
-    val scope = rememberCoroutineScope()
-
     var category by remember {
         mutableStateOf("")
     }
     var isClicked by remember {
         mutableStateOf(false)
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel?.getUser()
+        viewModel?.getAllPets()
     }
 
     LaunchedEffect(category) {
@@ -83,11 +87,6 @@ fun Home(
         if (!isClicked) {
             viewModel?.getAllPets()
         }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel?.getUser()
-        viewModel?.getAllPets()
     }
 
     LaunchedEffect(true) {
@@ -118,7 +117,7 @@ fun Home(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Welcome,",
                     fontSize = 18.sp
@@ -135,7 +134,6 @@ fun Home(
                 contentDescription = null,
                 modifier = Modifier
                     .height(50.dp)
-                    .padding(start = 130.dp)
                     .clip(CircleShape)
             )
         }
@@ -191,24 +189,32 @@ fun Home(
         Spacer(modifier = Modifier.height(8.dp))
 
         //pets
-        LazyRow {
-            items(state.pets) { pet ->
-                PetItem(
-                    modifier = Modifier.clickable {
-                        viewModel?.onNavToDetail(pet.animalId ?: "Unknown id")
-                    },
-                    pet = pet,
-                    onAddFavorite = {
-                        if(it.second) {
-                            viewModel?.addFavorite(it.first)
-                        } else {
-                            viewModel?.removeFavorite(it.first)
+        if(state.isLoading) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyRow {
+                items(state.pets) { pet ->
+                    PetItem(
+                        modifier = Modifier.clickable {
+                            viewModel?.onNavToDetail(pet.animalId ?: "Unknown id")
+                        },
+                        pet = pet,
+                        onAddFavorite = {
+                            if(it.second) {
+                                viewModel?.addFavorite(it.first)
+                            } else {
+                                viewModel?.removeFavorite(it.first)
+                            }
+                        },
+                        onDetail = {petId ->
+                            viewModel?.onNavToDetail(petId = petId)
                         }
-                    },
-                    onDetail = {petId ->
-                        viewModel?.onNavToDetail(petId = petId)
-                    }
-                )
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.height(16.dp))

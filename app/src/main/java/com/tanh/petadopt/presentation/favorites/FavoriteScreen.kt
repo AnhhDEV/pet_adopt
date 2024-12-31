@@ -33,10 +33,6 @@ fun FavoriteScreen (
 
     val state = viewModel?.state?.collectAsState(initial = HomeUIState())?.value ?: HomeUIState()
 
-    val haveFavorite by remember {
-        mutableStateOf(state.pets.isNotEmpty())
-    }
-
     Column(
         modifier = modifier.fillMaxSize()
             .padding(16.dp)
@@ -62,7 +58,7 @@ fun FavoriteScreen (
                             }
                         },
                     ) {
-
+                        viewModel?.onNavToDetail(petId = it)
                     }
                 }
             }
