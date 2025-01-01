@@ -231,7 +231,7 @@ fun Home(
                     shape = RoundedCornerShape(16.dp)
                 )
                 .clickable {
-
+                    viewModel?.onNavToAdd()
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center

@@ -34,6 +34,10 @@ class HomeViewModel @Inject constructor(
     private val _channel = Channel<OneTimeEvent>()
     val channel = _channel.receiveAsFlow()
 
+    fun onNavToAdd() {
+        sendEvent(OneTimeEvent.Navigate(Util.ADD))
+    }
+
     fun onNavToDetail(petId: String) {
         if (petId.isNotEmpty()) {
             sendEvent(OneTimeEvent.Navigate(Util.DETAIL + "/$petId"))

@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,7 +26,10 @@ import androidx.navigation.navArgument
 import com.google.android.gms.auth.api.identity.Identity
 import com.tanh.petadopt.data.GoogleAuthUiClient
 import com.tanh.petadopt.presentation.EntireScreen
+import com.tanh.petadopt.presentation.add.AddScreen
+import com.tanh.petadopt.presentation.add.AddViewModel
 import com.tanh.petadopt.presentation.authentication.Login
+import com.tanh.petadopt.presentation.authentication.LoginUiState
 import com.tanh.petadopt.presentation.authentication.LoginViewModel
 import com.tanh.petadopt.presentation.favorites.FavoriteScreen
 import com.tanh.petadopt.presentation.home.Home
@@ -44,15 +48,18 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PetAdoptTheme {
-
-                var isLoggedIn by remember {
-                    mutableStateOf(false)
-                }
-
                 val loginViewModel = hiltViewModel<LoginViewModel>()
                 val homeViewModel = hiltViewModel<HomeViewModel>()
                 val detailViewModel = hiltViewModel<DetailViewModel>()
+                val addViewModel = hiltViewModel<AddViewModel>()
                 val navController = rememberNavController()
+
+                val state = loginViewModel.state.collectAsState(initial = LoginUiState()).value
+
+                var isLoggedIn by remember {
+                    mutableStateOf(state.isLoginSuccessful)
+                }
+
                 Scaffold(
                     bottomBar = {
                         if (isLoggedIn) {
@@ -66,16 +73,16 @@ class MainActivity : ComponentActivity() {
                         startDestination = Util.LOG_IN
                     ) {
                         composable(Util.LOG_IN) {
+                            isLoggedIn = false
                             Login(
                                 viewModel = loginViewModel
                             ) {
                                 navController.navigate(it.route)
-                                isLoggedIn = !isLoggedIn
                             }
                         }
                         composable(Util.HOME) {
+                            isLoggedIn = true
                             Home(viewModel = homeViewModel) {
-                                isLoggedIn = !isLoggedIn
                                 navController.navigate(it.route)
                             }
                         }
@@ -83,6 +90,7 @@ class MainActivity : ComponentActivity() {
                         composable(
                             route = Util.FAVORITE
                         ) {
+                            isLoggedIn = true
                             FavoriteScreen(viewModel = homeViewModel)
                         }
 
@@ -97,12 +105,22 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         ) {
+                            isLoggedIn = false
                             val petId = it.arguments?.getString("petId") ?: ""
                             DetailScreen(
                                 viewModel = detailViewModel,
                                 petId = petId
                             ) { event ->
                                 navController.navigate(event.route)
+                            }
+                        }
+
+                        composable(Util.ADD) {
+                            isLoggedIn = false
+                            AddScreen(
+                                viewModel = addViewModel
+                            ) {
+                                navController.navigate(it.route)
                             }
                         }
                     }

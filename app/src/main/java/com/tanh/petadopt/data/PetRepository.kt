@@ -119,8 +119,8 @@ class PetRepository @Inject constructor(
     suspend fun insertPet(
         ownerId: String,
         name: String,
-        age: Long,
-        weight: Long,
+        age: Double,
+        weight: Double,
         breed: String,
         category: String,
         gender: Boolean,
