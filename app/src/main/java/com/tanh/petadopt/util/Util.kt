@@ -26,6 +26,18 @@ object Util {
         "Fish" to R.drawable.fish to false
     )
 
+    val petCategory = listOf(
+        "Dogs",
+        "Cats",
+        "Birds",
+        "Fish"
+    )
+
+    val gender = listOf(
+        "Male",
+        "Female"
+    )
+
 }
 
 enum class Category {

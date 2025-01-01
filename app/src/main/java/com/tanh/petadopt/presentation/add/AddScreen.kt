@@ -24,7 +24,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +50,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,8 +75,49 @@ fun AddScreen(
     val context = LocalContext.current
 
     val isNameError = state.nameError == null
+    val isBreedError = state.breedError == null
+    val isAgeError = state.ageError == null
+    val isWeightError = state.weightError == null
+    val isAddressError = state.addressError == null
+    val isAboutError = state.addressError == null
+
+    var genderExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    var genderSelected by remember {
+        mutableStateOf("Male")
+    }
+
+    var categoryExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    var selectedOption by remember {
+        mutableStateOf("Dogs")
+    }
 
     var inputName by remember {
+        mutableStateOf("")
+    }
+
+    var inputBreed by remember {
+        mutableStateOf("")
+    }
+
+    var inputAge by remember {
+        mutableStateOf("")
+    }
+
+    var inputWeight by remember {
+        mutableStateOf("")
+    }
+
+    var inputAddress by remember {
+        mutableStateOf("")
+    }
+
+    var inputAbout by remember {
         mutableStateOf("")
     }
 
@@ -173,7 +218,6 @@ fun AddScreen(
                 modifier = Modifier
                     .padding(top = 8.dp)
             )
-            Spacer(modifier = Modifier.padding(4.dp))
             TextField(
                 value = inputName,
                 onValueChange = { it ->
@@ -200,22 +244,74 @@ fun AddScreen(
                 )
             )
 
-
-            //Chọn breed
+            Spacer(modifier = Modifier.padding(4.dp))
+            //Chọn category
             Text(
-                text = if (isNameError) "Breed *"
-                else "Breed *  ${state.nameError}",
+                text = "Pet Category *",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.W500,
-                color = if (isNameError) Color.Black else Color.Red,
+                color = Color.Black,
                 modifier = Modifier
                     .padding(top = 8.dp)
             )
+
+            ExposedDropdownMenuBox(
+                expanded = categoryExpanded,
+                onExpandedChange = {
+                    categoryExpanded = !categoryExpanded
+                }
+            ) {
+                TextField(
+                    value = TextFieldValue(selectedOption),
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded)
+                    },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                        .padding(end = 8.dp),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    )
+                )
+                ExposedDropdownMenu(
+                    expanded = categoryExpanded,
+                    onDismissRequest = { categoryExpanded = false }
+                ) {
+                    Util.petCategory.forEach { option ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = option)
+                            },
+                            onClick = {
+                                selectedOption = option
+                                viewModel?.onCategorySelect(option)
+                                categoryExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
             Spacer(modifier = Modifier.padding(4.dp))
+            //Chọn breed
+            Text(
+                text = if (isBreedError) "Breed *"
+                else "Breed *  ${state.nameError}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.W500,
+                color = if (isBreedError) Color.Black else Color.Red,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+            )
             TextField(
-                value = inputName,
+                value = inputBreed,
                 onValueChange = { it ->
-                    inputName = it
+                    inputBreed = it
                     viewModel?.onBreedChange(it)
                 },
                 singleLine = true,
@@ -223,8 +319,220 @@ fun AddScreen(
                     .fillMaxWidth()
                     .border(
                         2.dp,
-                        if (isNameError) Color.White else Color.Red
-                    ),
+                        if (isBreedError) Color.White else Color.Red
+                    )
+                    .onFocusChanged { focusState ->
+                        if(focusState.isFocused && !isBreedError) {
+                            viewModel?.resetBreedState()
+                        }
+                    },
+                colors = TextFieldDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    containerColor = Color.White
+                )
+            )
+            Spacer(modifier = Modifier.padding(4.dp))
+            //Nhập age
+            Text(
+                text = if (isAgeError) "Age *"
+                else "Age *  ${state.ageError}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.W500,
+                color = if (isAgeError) Color.Black else Color.Red,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+            )
+            TextField(
+                value = inputAge,
+                onValueChange = {
+                    inputAge = it
+                    viewModel?.onAgeChange(it)
+                },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        2.dp,
+                        if (isAgeError) Color.White else Color.Red
+                    )
+                    .onFocusChanged { focusState ->
+                        if(focusState.isFocused && !isAgeError) {
+                            viewModel?.resetAgeState()
+                        }
+                    },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                )
+            )
+            
+            Spacer(modifier = Modifier.padding(4.dp))
+            //Chọn gender
+            Text(
+                text = "Gender *",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.W500,
+                color = Color.Black,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+            )
+            ExposedDropdownMenuBox(
+                expanded = genderExpanded,
+                onExpandedChange = {
+                    genderExpanded = !genderExpanded
+                }
+            ) {
+                TextField(
+                    value = genderSelected,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = genderExpanded)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    )
+                )
+                ExposedDropdownMenu(
+                    expanded = genderExpanded,
+                    onDismissRequest = {
+                        genderExpanded = false
+                    }
+                ) {
+                    Util.gender.forEach { option ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = option
+                                )
+                            },
+                            onClick = {
+                                genderSelected = option
+                                if(genderSelected == "Male") {
+                                    viewModel?.onGenderChange(true)
+                                } else {
+                                    viewModel?.onGenderChange(false)
+                                }
+                                genderExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.padding(4.dp))
+            //Nhập weight
+            Text(
+                text = if (isWeightError) "Weight *"
+                else "Weight *  ${state.weightError}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.W500,
+                color = if (isWeightError) Color.Black else Color.Red,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+            )
+            TextField(
+                value = inputWeight,
+                onValueChange = {
+                    inputWeight = it
+                    viewModel?.onWeightChange(it)
+                },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        2.dp,
+                        if (isWeightError) Color.White else Color.Red
+                    )
+                    .onFocusChanged { focusState ->
+                        if(focusState.isFocused && !isWeightError) {
+                            viewModel?.resetWeightState()
+                        }
+                    },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                )
+            )
+
+            Spacer(modifier = Modifier.padding(4.dp))
+            //Chọn address
+            Text(
+                text = if (isAddressError) "Address *"
+                else "Address *  ${state.addressError}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.W500,
+                color = if (isAddressError) Color.Black else Color.Red,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+            )
+            TextField(
+                value = inputAddress,
+                onValueChange = { it ->
+                    inputAddress = it
+                    viewModel?.onAddressChange(it)
+                },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        2.dp,
+                        if (isAddressError) Color.White else Color.Red
+                    )
+                    .onFocusChanged { focusState ->
+                        if(focusState.isFocused && !isAddressError) {
+                            viewModel?.resetAddressState()
+                        }
+                    },
+                colors = TextFieldDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    containerColor = Color.White
+                )
+            )
+
+            Spacer(modifier = Modifier.padding(4.dp))
+            //Chọn about
+            Text(
+                text = if (isAboutError) "About *"
+                else "About *  ${state.aboutError}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.W500,
+                color = if (isAboutError) Color.Black else Color.Red,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+            )
+            TextField(
+                value = inputAbout,
+                onValueChange = { it ->
+                    inputAbout = it
+                    viewModel?.onAboutChange(it)
+                },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        2.dp,
+                        if (isAboutError) Color.White else Color.Red
+                    )
+                    .onFocusChanged { focusState ->
+                        if(focusState.isFocused && !isAboutError) {
+                            viewModel?.resetAboutState()
+                        }
+                    },
                 colors = TextFieldDefaults.textFieldColors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,

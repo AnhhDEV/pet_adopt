@@ -12,3 +12,7 @@ val Yellow20 = Color(0xFFe7c982)
 val Gray = Color(0xFFefefef)
 
 val MyBlue = Color(0xFF0ea0fe)
+
+val itemColor = Color(0xFFFD9600)
+val backgroundItem = Color(0xFFFFEEBA)
+val strokeItem = Color(0xFFFBF4D8)

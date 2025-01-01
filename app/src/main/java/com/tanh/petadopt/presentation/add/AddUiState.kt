@@ -10,6 +10,7 @@ data class AddUiState(
     val gender: Boolean = false,
     val address: String = "",
     val about: String = "",
+
     val photoUrl: String? = null,
     val nameError: String? = null,
     val ageError: String? = null,
@@ -17,5 +18,7 @@ data class AddUiState(
     val breedError: String? = null,
     val addressError: String? = null,
     val aboutError: String? = null,
+    val categoryError: String? = null,
+    val genderError: String? = null,
     val error: String? = null
 )

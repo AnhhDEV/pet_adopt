@@ -1,5 +1,6 @@
 package com.tanh.petadopt.presentation.add
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tanh.petadopt.data.GoogleAuthUiClient
@@ -39,6 +40,19 @@ class AddViewModel @Inject constructor(
             val address = _state.value.address
             val about = _state.value.about
             val ownerId = auth.getSignedInUser()?.userId ?: ""
+
+            Log.d("testt", """
+                name: $name,
+                photoUrl: $photoUrl,
+                category: $category,
+                age: $age,
+                weight: $weight,
+                breed: $breed,
+                gender: $gender,
+                address: $address,
+                about: $about,
+                ownerId: $ownerId
+            """.trimIndent())
 
             insertPet(
                 ownerId = ownerId,
@@ -97,12 +111,12 @@ class AddViewModel @Inject constructor(
             _state.value = _state.value.copy(nameError = "Name cannot be empty")
             return false
         }
-        if(_state.value.age.isBlank()) {
-            _state.value = _state.value.copy(ageError = "Age cannot be empty")
-            return false
-        }
         if (_state.value.breed.isBlank()) {
             _state.value = _state.value.copy(breedError = "Breed cannot be empty")
+            return false
+        }
+        if(_state.value.age.isBlank()) {
+            _state.value = _state.value.copy(ageError = "Age cannot be empty")
             return false
         }
         if (_state.value.weight.isBlank()) {
@@ -148,6 +162,36 @@ class AddViewModel @Inject constructor(
     fun resetNameState() {
         _state.value = _state.value.copy(
             nameError = null
+        )
+    }
+
+    fun resetBreedState() {
+        _state.value = _state.value.copy(
+            breedError = null
+        )
+    }
+
+    fun resetAgeState() {
+        _state.value = _state.value.copy(
+            ageError = null
+        )
+    }
+
+    fun resetWeightState() {
+        _state.value = _state.value.copy(
+            weightError = null
+        )
+    }
+
+    fun resetAddressState() {
+        _state.value = _state.value.copy(
+            addressError = null
+        )
+    }
+
+    fun resetAboutState() {
+        _state.value = _state.value.copy(
+            aboutError = null
         )
     }
 

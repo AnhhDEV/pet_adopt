@@ -1,6 +1,5 @@
 package com.tanh.petadopt.presentation.components
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -28,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -89,16 +89,20 @@ fun PetItem(
         Box(
             modifier = Modifier.align(Alignment.BottomStart).padding(horizontal = 8.dp)
         ) {
-            Column {
+            Column(
+
+            ) {
                 Text(
                     text = pet.name ?: "",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Gelman",
+                    text = pet.breed ?: "",
                     color = Color.Gray,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -107,12 +111,13 @@ fun PetItem(
         ) {
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(12.dp))
                     .background(Yellow00)
             ) {
                 Text(
                     text = "   " + pet.age.toString() + " YRS   ",
                     color = Yellow60,
+                    fontSize = 10.sp,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
