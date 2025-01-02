@@ -24,7 +24,7 @@ class PetRepository @Inject constructor(
 
     private val collection = firestore.collection(Util.ANIMALS_COLLECTION)
 
-    suspend fun getAllPets(): Flow<Result<List<Pet>, Exception>> {
+    fun getAllPets(): Flow<Result<List<Pet>, Exception>> {
         return callbackFlow {
             var snapshotStateListener: ListenerRegistration? = null
             try {

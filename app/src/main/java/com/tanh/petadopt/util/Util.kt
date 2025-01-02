@@ -10,6 +10,7 @@ object Util {
     const val ADD = "add"
     const val INBOX = "Inbox"
     const val PROFILE = "Profile"
+    const val MY_POST = "mypost"
     const val LOG_IN = "login"
     const val DETAIL = "detail"
 

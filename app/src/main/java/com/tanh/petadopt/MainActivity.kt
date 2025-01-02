@@ -36,6 +36,8 @@ import com.tanh.petadopt.presentation.home.Home
 import com.tanh.petadopt.presentation.home.HomeViewModel
 import com.tanh.petadopt.presentation.pet_detail.DetailScreen
 import com.tanh.petadopt.presentation.pet_detail.DetailViewModel
+import com.tanh.petadopt.presentation.profile.ProfileScreen
+import com.tanh.petadopt.presentation.profile.ProfileViewModel
 import com.tanh.petadopt.ui.theme.Gray
 import com.tanh.petadopt.ui.theme.PetAdoptTheme
 import com.tanh.petadopt.util.Util
@@ -52,6 +54,8 @@ class MainActivity : ComponentActivity() {
                 val homeViewModel = hiltViewModel<HomeViewModel>()
                 val detailViewModel = hiltViewModel<DetailViewModel>()
                 val addViewModel = hiltViewModel<AddViewModel>()
+                val profileViewModel = hiltViewModel<ProfileViewModel>()
+
                 val navController = rememberNavController()
 
                 val state = loginViewModel.state.collectAsState(initial = LoginUiState()).value
@@ -119,6 +123,15 @@ class MainActivity : ComponentActivity() {
                             isLoggedIn = false
                             AddScreen(
                                 viewModel = addViewModel
+                            ) {
+                                navController.navigate(it.route)
+                            }
+                        }
+
+                        composable(Util.PROFILE) {
+                            isLoggedIn = true
+                            ProfileScreen(
+                                viewModel = profileViewModel
                             ) {
                                 navController.navigate(it.route)
                             }
