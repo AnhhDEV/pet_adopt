@@ -34,6 +34,8 @@ import com.tanh.petadopt.presentation.authentication.LoginViewModel
 import com.tanh.petadopt.presentation.favorites.FavoriteScreen
 import com.tanh.petadopt.presentation.home.Home
 import com.tanh.petadopt.presentation.home.HomeViewModel
+import com.tanh.petadopt.presentation.owned_post.OwnedPostScreen
+import com.tanh.petadopt.presentation.owned_post.PostViewModel
 import com.tanh.petadopt.presentation.pet_detail.DetailScreen
 import com.tanh.petadopt.presentation.pet_detail.DetailViewModel
 import com.tanh.petadopt.presentation.profile.ProfileScreen
@@ -55,6 +57,7 @@ class MainActivity : ComponentActivity() {
                 val detailViewModel = hiltViewModel<DetailViewModel>()
                 val addViewModel = hiltViewModel<AddViewModel>()
                 val profileViewModel = hiltViewModel<ProfileViewModel>()
+                val postViewModel = hiltViewModel<PostViewModel>()
 
                 val navController = rememberNavController()
 
@@ -132,6 +135,15 @@ class MainActivity : ComponentActivity() {
                             isLoggedIn = true
                             ProfileScreen(
                                 viewModel = profileViewModel
+                            ) {
+                                navController.navigate(it.route)
+                            }
+                        }
+
+                        composable(Util.MY_POST) {
+                            isLoggedIn = false
+                            OwnedPostScreen(
+                                viewModel = postViewModel
                             ) {
                                 navController.navigate(it.route)
                             }

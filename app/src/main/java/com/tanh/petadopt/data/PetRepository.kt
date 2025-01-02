@@ -24,6 +24,30 @@ class PetRepository @Inject constructor(
 
     private val collection = firestore.collection(Util.ANIMALS_COLLECTION)
 
+    fun getPetsByUser(userId: String): Flow<Result<List<Pet>, Exception>> {
+        return callbackFlow<Result<List<Pet>, Exception>> {
+            var snapshotStateListener: ListenerRegistration? = null
+            try {
+                snapshotStateListener = collection
+                    .whereEqualTo("ownerId", userId)
+                    .addSnapshotListener {value, error ->
+                        val response = if(value != null) {
+                            val pets = value.toObjects(Pet::class.java).mapNotNull { it }
+                            Result.Success(pets)
+                        } else {
+                            Result.Error(error = error ?: Exception("Unknown error"))
+                        }
+                        trySend(response)
+                    }
+            } catch (e: Exception) {
+                trySend(Result.Error(e))
+            }
+            awaitClose {
+                snapshotStateListener?.remove()
+            }
+        }.flowOn(Dispatchers.IO)
+    }
+
     fun getAllPets(): Flow<Result<List<Pet>, Exception>> {
         return callbackFlow {
             var snapshotStateListener: ListenerRegistration? = null
