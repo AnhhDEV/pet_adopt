@@ -43,7 +43,7 @@ fun ChatItem(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(60.dp)
+                .size(50.dp)
                 .clip(shape = CircleShape)
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -53,20 +53,22 @@ fun ChatItem(
             Text(
                 text = chat.toName ?: "Noname",
                 fontSize = 18.sp,
-                fontWeight = FontWeight.W300,
+                fontWeight = FontWeight.W700,
                 maxLines = 1
             )
             Row {
                 Text(
                     text = chat.lastMessage ?: "No message",
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     maxLines = 1,
+                    fontWeight = FontWeight.W300,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
                 Text(
                     text = TimeDefinition.formatDate(chat.lastTime ?: Timestamp.now()),
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.W300,
                     maxLines = 1
                 )
             }
