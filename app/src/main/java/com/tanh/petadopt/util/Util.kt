@@ -13,10 +13,13 @@ object Util {
     const val MY_POST = "mypost"
     const val LOG_IN = "login"
     const val DETAIL = "detail"
+    const val MESSENGER = "messenger"
 
     const val ANIMALS_COLLECTION = "pets"
     const val USERS_COLLECTION = "users"
     const val PREFERENCES_COLLECTION = "favorite_pets"
+    const val CHATS_COLLECTION = "chatrooms"
+    const val MESSAGE_COLLECTION = "msglist"
 
     const val CAT_PAW_URL = "https://i.ibb.co/bFS61Pp/cat-removebg-preview.png"
 
@@ -39,9 +42,5 @@ object Util {
         "Female"
     )
 
-}
-
-enum class Category {
-    Dogs, Cats, Fish, Birds
 }
 

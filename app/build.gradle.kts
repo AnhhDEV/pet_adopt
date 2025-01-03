@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.tanh.petadopt"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -63,6 +63,10 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    testImplementation ("org.mockito:mockito-core:4.11.0")
+    testImplementation ("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     //coil

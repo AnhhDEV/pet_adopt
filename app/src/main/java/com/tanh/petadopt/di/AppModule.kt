@@ -5,6 +5,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.tanh.petadopt.data.ChatRepository
 import com.tanh.petadopt.data.GoogleAuthUiClient
 import com.tanh.petadopt.data.PetRepository
 import com.tanh.petadopt.data.PreferenceRepository
@@ -43,5 +44,9 @@ object AppModule {
     @Provides
     @Singleton
     fun providePreferenceRepository(firestore: FirebaseFirestore) = PreferenceRepository(firestore)
+
+    @Provides
+    @Singleton
+    fun provideChatRepository(firestore: FirebaseFirestore) = ChatRepository(firestore)
 
 }
